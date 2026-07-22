@@ -5,6 +5,8 @@ real time — which ones are up, which ones are down, and how fast they're
 responding. Built end-to-end as a portfolio project: from a Flask app to a
 real Kubernetes cluster running on AWS, with CI and monitoring.
 
+📺 **Demo video:** [Watch on YouTube](https://youtu.be/0ZkbO-eiVvc)
+
 > **Note:** the AWS infrastructure shown below was deployed, tested, and then
 > torn down (`terraform destroy`) after the demo recording to avoid ongoing
 > costs. The demo video is the best way to see it running live.
