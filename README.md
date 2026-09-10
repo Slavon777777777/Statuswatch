@@ -6,32 +6,35 @@ responding. Built end-to-end as a portfolio project: from a Flask app to a
 real Kubernetes cluster running on AWS, with CI and monitoring.
 
 📺 **Demo video:** [Watch on YouTube](https://youtu.be/0Zkb0-eiVvc)
-
 > **Note:** the AWS infrastructure shown below was deployed, tested, and then
 > torn down (`terraform destroy`) after the demo recording to avoid ongoing
 > costs. The demo video is the best way to see it running live.
 
-![Architecture diagram](docs/architecture.png)
+[![Architecture diagram](https://github.com/Slavon777777777/Statuswatch/raw/main/docs/architecture.png)](/Slavon777777777/Statuswatch/blob/main/docs/architecture.png)
+
+## Infrastructure
+
+The AWS infrastructure (VPC, EC2 instances, security groups) for this project is managed separately via Terraform: [statuswatch-infra](https://github.com/Slavon777777777/statuswatch-infra)
 
 ## What it does
 
 - Checks a configurable list of target URLs every 30 seconds
 - Serves a live status dashboard (`/`) showing UP/DOWN state and response time
 - Exposes the same data as JSON (`/status`) and a health endpoint (`/health`)
-  for use as a Kubernetes liveness/readiness probe
+for use as a Kubernetes liveness/readiness probe
 
 ## Tech stack
 
-| Layer | Tools |
-|---|---|
-| Application | Python 3.12, Flask, `requests`, `threading` |
-| Containerization | Docker |
-| Image registry | AWS ECR |
-| Infrastructure | Terraform (VPC, EC2, Security Groups on AWS) |
-| Orchestration | Kubernetes — self-managed cluster via **kubeadm** (not EKS) |
-| Networking | Flannel CNI |
-| CI | GitHub Actions — builds and pushes a new image to ECR on every push to `main` |
-| Monitoring | Prometheus + Grafana, deployed via the `kube-prometheus-stack` Helm chart |
+| Layer            | Tools                                                                         |
+| ---------------- | ----------------------------------------------------------------------------- |
+| Application      | Python 3.12, Flask, `requests`, `threading`                                   |
+| Containerization | Docker                                                                        |
+| Image registry   | AWS ECR                                                                       |
+| Infrastructure   | Terraform (VPC, EC2, Security Groups on AWS)                                  |
+| Orchestration    | Kubernetes — self-managed cluster via **kubeadm** (not EKS)                   |
+| Networking       | Flannel CNI                                                                   |
+| CI               | GitHub Actions — builds and pushes a new image to ECR on every push to `main` |
+| Monitoring       | Prometheus + Grafana, deployed via the `kube-prometheus-stack` Helm chart     |
 
 ## Why kubeadm instead of EKS
 
@@ -47,12 +50,12 @@ loopback quirk) — diagnosed and fixed by pointing kubelet at
 
 - ✅ **CI:** every push to `main` builds a Docker image and pushes it to ECR
 - ❌ **CD:** deploying a new image to the cluster is still a manual
-  `kubectl rollout restart` — full GitOps-style continuous deployment is
-  planned for a follow-up project using ArgoCD
+`kubectl rollout restart` — full GitOps-style continuous deployment is
+planned for a follow-up project using ArgoCD
 
 ## Running it locally
 
-```bash
+```
 git clone https://github.com/Slavon777777777/Statuswatch.git
 cd Statuswatch
 python3 -m venv venv
@@ -65,7 +68,7 @@ Then open `http://localhost:5000`.
 
 Or with Docker:
 
-```bash
+```
 docker build -t statuswatch:local .
 docker run -p 5000:5000 statuswatch:local
 ```
@@ -73,16 +76,16 @@ docker run -p 5000:5000 statuswatch:local
 ## Known limitations
 
 - Target checks run **sequentially**, not in parallel — fine for a handful
-  of sites, but a slow/unresponsive target adds its full timeout (5s) to the
-  whole check cycle. An async (`aiohttp`) or thread-pool implementation would
-  be the next step to scale this up.
+of sites, but a slow/unresponsive target adds its full timeout (5s) to the
+whole check cycle. An async (`aiohttp`) or thread-pool implementation would
+be the next step to scale this up.
 - Grafana has no persistent volume configured — its admin password and any
-  custom dashboards reset if the pod is rescheduled. Fine for a demo
-  environment, not for production.
+custom dashboards reset if the pod is rescheduled. Fine for a demo
+environment, not for production.
 
 ## Roadmap
 
 - [ ] Async/parallel target checking
 - [ ] Persistent storage for Grafana
 - [ ] Full CD (GitOps via ArgoCD) — planned as a separate project reusing
-      this same cluster
+this same cluster
