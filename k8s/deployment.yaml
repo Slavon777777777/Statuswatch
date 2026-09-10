@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: statuswatch
+  labels:
+    app: statuswatch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: statuswatch
+  template:
+    metadata:
+      labels:
+        app: statuswatch
+    spec:
+      containers:
+      - name: statuswatch
+        image: 096031498540.dkr.ecr.eu-west-1.amazonaws.com/statuswatch:v1
+        ports:
+        - containerPort: 5000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      imagePullSecrets:
+      - name: ecr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: statuswatch-service
+spec:
+  type: NodePort
+  selector:
+    app: statuswatch
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30080
